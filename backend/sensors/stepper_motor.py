@@ -36,23 +36,65 @@ class StepperMotor:
                     GPIO.output(self.control_pins[pin], self.cw_halfstep_seq[-(halfstep)][pin])
             sleep(step_speed)
              
-    def rotate(self, degrees, rotation_speed, reverse=False):
+    def rotate(self, degrees, rotation_speed, reverse=False, max_accel=0.5):
+
+        # state variables   
+        target_speed = rotation_speed
+        curr_speed = 0
+        curr_accel = 0
+
+        # constants and gains
+        MIN_SPEED = 5
+        ACCEL_MAX = 15000
+        JERK_MAX = 8e5
+        dt = 10e-5
+
+        # keep track of how many cycles it took to accelerate
+        accel_cycles = 0
         
         # convert degress to cycles with 512 cycles per 360 degrees
         cycles = int(degrees / 360 * 512)
 
-        # convert RPM to time per step by dividing timer per cycle by 8 steps
-        step_speed = (60 / (rotation_speed*512)) / 8
-
         for i in range(cycles):
+
+            # check for when target speed is reached
+            if(curr_speed >= target_speed and accel_cycles == 0):
+                accel_cycles = i
+                curr_accel = 0
+
+            # standstill speed to avoid pull in stall
+            if curr_speed == 0 and target_speed != 0:
+                curr_speed = MIN_SPEED
+
+            else:
+                # update acceleration and speed
+                  
+                if i <= cycles - accel_cycles:
+                    curr_accel = min(curr_accel+JERK_MAX*dt, ACCEL_MAX) if curr_speed < target_speed else curr_accel
+                    curr_speed = min(curr_speed+curr_accel*dt, target_speed)
+                else:
+                    curr_accel = min(curr_accel+JERK_MAX*dt, ACCEL_MAX)
+                    curr_speed = max(curr_speed-curr_accel*dt, MIN_SPEED)                    
+           
+            # convert RPM to time per step by dividing timer per cycle by 8 steps
+            step_speed = (60 / (curr_speed * 512)) / 8
+
             self.cycle(step_speed, reverse)
+
+            print(f"current speed: {curr_speed}")
+            print(f"current accel: {curr_accel}")
+            sleep(dt)
+
+           
 
 if __name__ == "__main__":
     GPIO.setmode(GPIO.BCM)
 
-    motor = StepperMotor(21, 20, 16, 12)
+    try:
+        motor = StepperMotor(21, 20, 16, 12)
 
-    motor.rotate(360, 30)
-    motor.rotate(360, 30, True)
+        motor.rotate(360, 30)
+        motor.rotate(360, 30, True)
 
-    GPIO.cleanup()
+    finally:
+        GPIO.cleanup()
