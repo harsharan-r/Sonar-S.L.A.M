@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+#/usr/bin/env python3
 """
 ultrasonic.py
 
@@ -26,14 +26,10 @@ class Ultrasonic:
         Parameters:
             trig_pin (int): GPIO pin used for trigger signal
             echo_pin (int): GPIO pin used for echo signal
-            GPIO_mode (GPIO pinmode, optional): what the pin numbers reference to, either GPIO.BCM or GPIO.BOARD
         """
 
         self.trig_pin = trig_pin
         self.echo_pin = echo_pin
-    
-        # set GPIO to use gpio numbers
-        GPIO.setmode(GPIO_mode)
             
         # set correct pin mode for trig and echo    
         GPIO.setup(trig_pin, GPIO.OUT)
@@ -159,6 +155,8 @@ class Ultrasonic:
 
 if __name__ == "__main__":
     
+    GPIO.setmode(GPIO.BCM)
+
     dist_sensor = Ultrasonic(27,17)
 
     distance = dist_sensor.filtered_distance()
