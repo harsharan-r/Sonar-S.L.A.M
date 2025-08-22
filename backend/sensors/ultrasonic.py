@@ -12,7 +12,7 @@ from time import sleep, perf_counter
 
 class Ultrasonic:
     """
-    Represent an ultrsonic distance sensor
+    Represents an ultrsonic distance sensor
 
     Attributes:
         trig_pin (int): GPIO pin used for the trigger signal
