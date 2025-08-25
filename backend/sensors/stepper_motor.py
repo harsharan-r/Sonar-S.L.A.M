@@ -23,7 +23,11 @@ class StepperMotor:
             in3 (int): GPIO pin connect to in3 on motor driver
             in4 (int): GPIO pin connect to in4 on motor driver
         """
-        
+
+        # Keeps track of postion of the motor
+        self.position = 0
+
+        # initialising GPIO pins
         self.control_pins = [in1, in2, in3, in4]
 
         for pin in self.control_pins:
@@ -40,6 +44,10 @@ class StepperMotor:
           [0,0,0,1],
           [1,0,0,1]
         ]
+
+    def calibrate(self):
+        """Resets position value"""
+        self.position = 0
 
     def cycle(self, step_speed, reverse=False):
         """
@@ -70,6 +78,9 @@ class StepperMotor:
             degrees (int): number of degrees to turn the motor
             rotation_speed (float): speed in rotations per minute 
             reverse (bool, optional): set true to turn counterclockwise
+
+        Attributes:
+            position (float): relative position of the motor
         """
 
         # state variables   
@@ -78,9 +89,9 @@ class StepperMotor:
         curr_accel = 0
 
         # constants
-        MIN_SPEED = 5
+        MIN_SPEED = 10
         ACCEL_MAX = 15000
-        JERK_MAX = 8e5
+        JERK_MAX = 6e5
         dt = 10e-5
 
         # keep track of how many cycles it took to accelerate
@@ -117,12 +128,31 @@ class StepperMotor:
             step_speed = (60 / (curr_speed * 512)) / 8
 
             self.cycle(step_speed, reverse)
-            
+
+            # Update relative positon
+            self.position += -360/512 if(reverse) else 360/512
+            print(self.position)
+
             # sleep some amount to avoid consuming excess resources
             # keeps calculations accurate 
             sleep(dt)
 
-           
+    def move_to(self, position, rotation_speed):
+        """
+        Moves to a relative position to the current position of the motor
+
+        Parameters:
+            position (int): relative position to turn the motor
+            rotation_speed (float): speed in rotations per minute 
+        """
+
+        degrees = position - self.position
+
+        if(degrees<0):
+            self.rotate(abs(degrees), rotation_speed, True)
+        else:
+            self.rotate(degrees, rotation_speed)
+
 
 if __name__ == "__main__":
     GPIO.setmode(GPIO.BCM)
@@ -130,9 +160,17 @@ if __name__ == "__main__":
     try:
         motor = StepperMotor(21, 20, 16, 12)
 
-        motor.rotate(360, 30)
+        # motor.rotate(90, 30)
+        # sleep(0.5)
+        # motor.rotate(180, 30, True)
+        # sleep(0.5)
+        #motor.rotate(90,30)
+
+        motor.move_to(90,30)
         sleep(0.5)
-        motor.rotate(360, 30, True)
+        motor.move_to(-90,30)
+        sleep(0.5)
+        motor.move_to(0, 30)
 
     finally:
         GPIO.cleanup()
