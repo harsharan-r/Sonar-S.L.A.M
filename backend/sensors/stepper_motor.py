@@ -11,7 +11,10 @@ from time import sleep
 
 
 class StepperMotor:
-    """Represents a stepper motor"""
+    """
+    Represents a stepper motor connected with a ULN2004
+    providing necessary functions for movement
+    """
 
     def __init__(self, in1, in2, in3, in4):
         """
@@ -69,7 +72,7 @@ class StepperMotor:
                     GPIO.output(self.control_pins[pin], self.cw_halfstep_seq[-(halfstep)][pin])
             sleep(step_speed)
              
-    def rotate(self, degrees, rotation_speed, reverse=False):
+    def rotate(self, degrees, rotation_speed, reverse=False, verbose=False):
         """
         Rotates the motor for a certain amount of degrees.
         Uses cycles as steps, with there being 512 steps per one revolution
@@ -131,13 +134,14 @@ class StepperMotor:
 
             # Update relative positon
             self.position += -360/512 if(reverse) else 360/512
-            print(self.position)
+            
+            if(verbose): print(self.position)
 
             # sleep some amount to avoid consuming excess resources
             # keeps calculations accurate 
             sleep(dt)
 
-    def move_to(self, position, rotation_speed):
+    def move_to(self, position, rotation_speed, verbose=False):
         """
         Moves to a relative position to the current position of the motor
 
@@ -149,9 +153,9 @@ class StepperMotor:
         degrees = position - self.position
 
         if(degrees<0):
-            self.rotate(abs(degrees), rotation_speed, True)
+            self.rotate(abs(degrees), rotation_speed, True, verbose)
         else:
-            self.rotate(degrees, rotation_speed)
+            self.rotate(degrees, rotation_speed, verbose=verbose
 
 
 if __name__ == "__main__":
