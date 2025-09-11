@@ -321,24 +321,36 @@ class MPU:
                 
         return gyro_values
 
-
+import time
 
 if __name__ == "__main__":
     imu = MPU(0x68)
     
-    imu.set_accel_range(2)
-    print(imu.read_accel_range())
-    print(imu.get_accel_data(calibrate=True))
+    imu.set_accel_range(16)
+    #print(imu.read_accel_range())
+    #print(imu.get_accel_data(calibrate=True))
     imu.calibrate_accel()
-    imu.set_accel_range(2)
-    print(imu.read_accel_range())
-    print(imu.get_accel_data(calibrate=True))
+    #imu.set_accel_range(2)
+    #print(imu.read_accel_range())
+    #print(imu.get_accel_data(calibrate=True))
 
     #imu.set_gyro_range(500)
     #print(imu.read_gyro_range())
     #print(imu.get_gyro_data(True))
 
-    #imu.calibrate_gyro()
+    imu.calibrate_gyro()
     #imu.set_gyro_range(500)
     #print(imu.read_gyro_range())
     #print(imu.get_gyro_data(True))
+
+    try:
+        while(True):
+            a_val = imu.get_accel_data(calibrate=True)
+            g_val = imu.get_gyro_data(calibrate=True)
+            print(f"Accel Values: x: {a_val['x']}, y: {a_val['y']}, z: {a_val['z']}, Gyro Values: x: {g_val['x']}, y: {g_val['y']}, z: {g_val['z']}")    
+
+            time.sleep(0.1)
+
+    finally:
+        print("Process has been interuppted")
+                
