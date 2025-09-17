@@ -52,6 +52,10 @@ class StepperMotor:
         """Resets position value"""
         self.position = 0
 
+    def stop(self):
+        for pin in range(4):
+            GPIO.output(self.control_pins[pin], 0)
+
     def cycle(self, step_speed, reverse=False):
         """
         Executes one halfstep cycle on the stepper motor
@@ -94,7 +98,7 @@ class StepperMotor:
         # constants
         MIN_SPEED = 10
         ACCEL_MAX = 15000
-        JERK_MAX = 6e5
+        JERK_MAX = 3e4
         dt = 10e-5
 
         # keep track of how many cycles it took to accelerate
@@ -155,7 +159,7 @@ class StepperMotor:
         if(degrees<0):
             self.rotate(abs(degrees), rotation_speed, True, verbose)
         else:
-            self.rotate(degrees, rotation_speed, verbose=verbose
+            self.rotate(degrees, rotation_speed, verbose=verbose)
 
 
 if __name__ == "__main__":
@@ -170,11 +174,13 @@ if __name__ == "__main__":
         # sleep(0.5)
         #motor.rotate(90,30)
 
-        motor.move_to(90,30)
-        sleep(0.5)
-        motor.move_to(-90,30)
-        sleep(0.5)
+        for i in range(10):
+            motor.move_to(90,30)
+            sleep(0.1)
+            motor.move_to(0,30)
+            sleep(0.1)
         motor.move_to(0, 30)
 
     finally:
-        GPIO.cleanup()
+        pass
+        #GPIO.cleanup()
