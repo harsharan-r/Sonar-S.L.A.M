@@ -32,6 +32,7 @@ RUN curl -sSL https://raw.githubusercontent.com/ros/rosdistro/master/ros.asc | a
 # Install ROS 2 base
 RUN apt-get update && apt-get install -y \
     ros-humble-ros-base \
+    python3-colcon-common-extensions \
     && rm -rf /var/lib/apt/lists/*
 
 # Source ROS 2 environment automatically
