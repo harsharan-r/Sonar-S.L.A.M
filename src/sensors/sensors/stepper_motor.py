@@ -174,13 +174,12 @@ if __name__ == "__main__":
         # sleep(0.5)
         #motor.rotate(90,30)
 
-        for i in range(10):
-            motor.move_to(90,30)
-            sleep(0.1)
-            motor.move_to(0,30)
-            sleep(0.1)
-        motor.move_to(0, 30)
+        #for i in range(0,-90,-2):
+        #    motor.move_to(i,30)
+        #    sleep(0.01)
+
+        #motor.move_to(0, 30)
+        
 
     finally:
-        pass
-        #GPIO.cleanup()
+        GPIO.cleanup()
