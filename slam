@@ -1,0 +1,32 @@
+#!/usr/bin/env bash
+# slam - simple command wrapper for SLAM project
+
+set -e
+
+CMD=$1
+shift || true  # remove first argument, rest go in $@
+
+case "$CMD" in
+  build)
+    docker build -f docker/Dockerfile -t ros-gpio .
+    ;;
+  run)
+    docker run -it --rm \
+    --device /dev/gpiomem \
+    --privileged \
+    -v $(pwd)/src:/app/src \
+    -w /app/src \
+    -p 8765:8765 \
+    ros-gpio
+    ;;
+  foxglove)
+    docker exec -it ros-gpio ros2 launch foxglove_bridge foxglove_bridge.launch.xml
+    ;;
+  setup_i2c)
+    chmod +x ./scripts/setup_i2c.sh && ./scripts/setup_i2c.sh 
+    ;;
+  *)
+    echo "Usage: slam {build|run|foxglove|setup_i2c}"
+    exit 1
+    ;;
+esac
