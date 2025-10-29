@@ -6,7 +6,7 @@ FROM ${BASE_IMAGE} AS source
 # Avoid timezone prompts during install
 ENV DEBIAN_FRONTEND=noninteractive
 
-# Install dependencies for Ros 2 and Pythong
+# Install dependencies for Ros 2 and Python
 RUN apt-get update && apt-get install -y \
     locales \
     curl \
@@ -40,7 +40,11 @@ SHELL ["/bin/bash", "-c"]
 RUN echo "source /opt/ros/humble/setup.bash" >> /etc/bash.bashrc
 
 # Install Python packages
-RUN pip install matplotlib
+RUN pip install matplotlib smbus2
+
+# Install ROS 2 packages
+RUN apt-get update && apt-get install -y \
+    ros-humble-foxglove-bridge
 
 # Set working directory
 WORKDIR /src
